@@ -20,37 +20,41 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Employee List'),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 15, right: 15),
-        child: FloatingActionButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    return BlocBuilder<UserBloc, UserBlocState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Employee List')),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 15, right: 15),
+            child: FloatingActionButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AddEmployeePage()));
+              },
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
           ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const AddEmployeePage()));
-          },
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
-      bottomNavigationBar: Container(
-          height: 75,
-          color: const Color(0xffF2F2F2),
-          child: const Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Text("Swipe left to delete",
-                style: TextStyle(color: Color(0xff949C9E))),
-          )),
-      body: BlocBuilder<UserBloc, UserBlocState>(
-        builder: (context, state) {
-          return Padding(
+          floatingActionButtonLocation:
+              state.currentUser.isEmpty && state.previousUser.isEmpty
+                  ? null
+                  : FloatingActionButtonLocation.endContained,
+          bottomNavigationBar:
+              state.currentUser.isEmpty && state.previousUser.isEmpty
+                  ? null
+                  : Container(
+                      height: 75,
+                      color: const Color(0xffF2F2F2),
+                      child: const Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text("Swipe left to delete",
+                            style: TextStyle(color: Color(0xff949C9E))),
+                      )),
+          body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: state.currentUser.isEmpty && state.previousUser.isEmpty
                 ? Center(
@@ -64,9 +68,9 @@ class _HomePageState extends State<HomePage> {
                       kListBuilder(state.previousUser, isPrevious: true),
                     ],
                   ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -116,6 +120,7 @@ class _HomePageState extends State<HomePage> {
               ),
               onDismissed: (direction) {
                 bool isDelete = true;
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   duration: const Duration(seconds: 3),
                   content: const Text('Employee data has been deleted'),
